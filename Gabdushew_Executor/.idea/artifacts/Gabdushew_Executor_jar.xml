@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="Gabdushew_Executor:jar">
+    <output-path>$PROJECT_DIR$/../Gabdushev_Manager/artifacts</output-path>
+    <root id="root">
+      <element id="archive" name="Gabdushew_Executor.jar">
+        <element id="module-output" name="Gabdushew_Executor" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/../Gabdushev_Manager/libs/PipelineInterfaces.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/../Gabdushev_Manager/libs/UniversalConfigReader.jar" />
+    </root>
+  </artifact>
+</component>

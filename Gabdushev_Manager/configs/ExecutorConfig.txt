@@ -1,0 +1,4 @@
+mode := "DECODING"
+normal_weights_max := "192"
+ceiling_weights_max := "256"
+buffer_size := "512"
