@@ -2,7 +2,7 @@ package maloxit.Pipeline;
 
 import com.java_polytech.pipeline_interfaces.RC;
 
-class ArithmeticDecoder extends ArithmeticCodingProcessor {
+class ArithmeticDecoder extends AdaptiveArithmeticCoder {
 
     private boolean hasReachedEnd;
     private double workingLow;

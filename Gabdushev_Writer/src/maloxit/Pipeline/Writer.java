@@ -15,6 +15,11 @@ public class Writer implements IWriter {
     private OutputStream output;
     private BufferedOutputStream bufferedOutput;
 
+    /**
+     * Uses a given config file to set parameters value
+     * @param cfgFileName Writer config file path
+     * @return Return Code object, which contains information about reason of the end of work
+     */
     @Override
     public RC setConfig(String cfgFileName) {
         IUniversalConfigReader config = new UniversalConfigReader();
@@ -48,6 +53,11 @@ public class Writer implements IWriter {
         return RC.RC_SUCCESS;
     }
 
+    /**
+     * Processes given data package
+     * @param buff input data package or null if input has reached end
+     * @return Return Code object, which contains information about reason of the end of work
+     */
     @Override
     public RC consume(byte[] buff) {
         if (buff == null) {
@@ -66,6 +76,11 @@ public class Writer implements IWriter {
         return RC.RC_SUCCESS;
     }
 
+    /**
+     * Sets an output stream to write data to
+     * @param output output stream to write data to
+     * @return Return Code object, which contains information about reason of the end of work
+     */
     @Override
     public RC setOutputStream(OutputStream output) {
         this.output = output;

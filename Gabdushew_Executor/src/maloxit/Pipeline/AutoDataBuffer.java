@@ -13,7 +13,8 @@ class AutoDataBuffer {
     private final byte[] buffer;
     private int filled;
 
-    /**Char data buffer that automatically calls given function when filled
+    /**
+     * Char data buffer that automatically calls given function when filled
      * @param out function, that needs to be applied to data
      * @param size size of data buffer in bytes
      */
@@ -22,7 +23,8 @@ class AutoDataBuffer {
         this.buffer = new byte[size];
     }
 
-    /**Force flushes buffer
+    /**
+     * Force flushes buffer
      * @return  Return Code object, which contains information about reason of the end of work
      */
     public RC flush() {
@@ -31,7 +33,8 @@ class AutoDataBuffer {
         return out.apply(data);
     }
 
-    /**Puts a given byte to buffer
+    /**
+     * Puts a given byte to buffer
      * @param val byte to put to buffer
      * @return Return Code object, which contains information about reason of the end of work
      */

@@ -39,7 +39,8 @@ class Manager {
         }
     }
 
-    /**Uses parameters from given config file to build a pipeline
+    /**
+     * Uses parameters from given config file to build a pipeline
      * @param managerConfigFileName Manager config file path
      * @return Return Code object, which contains information about reason of the end of work
      */
@@ -85,7 +86,8 @@ class Manager {
         return buildPipeline(new PipelineParams(inputFileName, outputFileName, readerConfigFileName, writerConfigFileName, executorConfigFileName, readerClassName, writerClassName, executorClassName));
     }
 
-    /**Builds and runs a pipeline with given parameters.
+    /**
+     * Builds and runs a pipeline with given parameters.
      * @param pipelineParams Parameters for pipeline
      * @return Return Code object, which contains information about reason of the end of work
      */

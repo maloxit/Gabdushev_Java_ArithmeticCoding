@@ -2,7 +2,7 @@ package maloxit.Pipeline;
 
 import com.java_polytech.pipeline_interfaces.RC;
 
-class ArithmeticEncoder extends ArithmeticCodingProcessor {
+class ArithmeticEncoder extends AdaptiveArithmeticCoder {
 
     private int bufferByte;
     private int bufferByteFreeBits;
@@ -31,13 +31,11 @@ class ArithmeticEncoder extends ArithmeticCodingProcessor {
 
     @Override
     public RC Finish() {
-        for (int i = 0; i < 1; i++) {
-            UpdateWorkingRange(alphabetLen);
-            RC rc = TryPutBits();
-            if (!rc.isSuccess())
-                return rc;
-        }
-        RC rc = PrintFinalByte();
+        UpdateWorkingRange(alphabetLen);
+        RC rc = TryPutBits();
+        if (!rc.isSuccess())
+            return rc;
+        rc = PrintFinalByte();
         if (!rc.isSuccess())
             return rc;
         return out.flush();

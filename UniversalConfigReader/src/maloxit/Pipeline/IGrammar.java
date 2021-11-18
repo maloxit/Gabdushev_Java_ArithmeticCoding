@@ -18,5 +18,6 @@ public interface IGrammar {
     void markParamSet(String paramName);
 
     void reset();
+
     boolean isAllSet();
 }

@@ -26,9 +26,14 @@ public class Executor implements IExecutor {
     private double normalWeightsMax;
     private double ceilingWeightsMax;
     private CodingMode mode;
-    private ArithmeticCodingProcessor codingProcessor;
+    private AdaptiveArithmeticCoder codingProcessor;
     private IConsumer consumer;
 
+    /**
+     * Uses a given config file to set parameters value
+     * @param cfgFileName Executor config file path
+     * @return Return Code object, which contains information about reason of the end of work
+     */
     @Override
     public RC setConfig(String cfgFileName) {
         IUniversalConfigReader config = new UniversalConfigReader();
@@ -103,6 +108,11 @@ public class Executor implements IExecutor {
         return RC.RC_SUCCESS;
     }
 
+    /**
+     * Processes given data package
+     * @param buff input data package or null if input has reached end
+     * @return Return Code object, which contains information about reason of the end of work
+     */
     @Override
     public RC consume(byte[] buff) {
         RC rc = RC.RC_SUCCESS;
@@ -118,6 +128,11 @@ public class Executor implements IExecutor {
         return rc;
     }
 
+    /**
+     * Sets a consumer that will consume and process information provided by this object
+     * @param consumer consumer an IConsumer object
+     * @return Return Code object, which contains information about reason of the end of work
+     */
     @Override
     public RC setConsumer(IConsumer consumer) {
         this.consumer = consumer;

@@ -17,7 +17,8 @@ public class Reader implements IReader {
     private IConsumer consumer;
 
 
-    /**Uses a given config file to set parameters value
+    /**
+     * Uses a given config file to set parameters value
      * @param cfgFileName Reader config file path
      * @return Return Code object, which contains information about reason of the end of work
      */
@@ -49,7 +50,8 @@ public class Reader implements IReader {
         return RC.RC_SUCCESS;
     }
 
-    /**Sets a consumer that will consume and process information provided by this object
+    /**
+     * Sets a consumer that will consume and process information provided by this object
      * @param consumer an IConsumer object
      * @return Return Code object, which contains information about reason of the end of work
      */
@@ -59,7 +61,8 @@ public class Reader implements IReader {
         return RC.RC_SUCCESS;
     }
 
-    /**Sets an input stream to read from
+    /**
+     * Sets an input stream to read from
      * @param input stream of input data to read
      * @return Return Code object, which contains information about reason of the end of work
      */
@@ -69,7 +72,8 @@ public class Reader implements IReader {
         return RC.RC_SUCCESS;
     }
 
-    /**Runs pipeline by reading and sending packets od input data to next pipeline element to process until all is read or some not SUCCESS Return Code received
+    /**
+     * Runs pipeline by reading and sending packets od input data to next pipeline element to process until all is read or some not SUCCESS Return Code received
      * @return Return Code object, which contains information about reason of the end of work
      */
     @Override
