@@ -1,8 +1,0 @@
-input_file := "configs\code2.txt"
-output_file := "configs\code1.txt"
-reader_config_file := "configs\ReaderConfig.txt"
-writer_config_file := "configs\WriterConfig.txt"
-executor_config_file := "configs\ExecutorConfig.txt"
-reader_class := "maloxit.Pipeline.Reader"
-writer_class := "maloxit.Pipeline.Writer"
-executor_class := "maloxit.Pipeline.Executor"

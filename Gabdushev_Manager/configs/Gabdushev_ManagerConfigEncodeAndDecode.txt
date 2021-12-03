@@ -1,0 +1,8 @@
+input_file := "configs\code1.txt"
+output_file := "configs\code2.txt"
+reader_config_file := "configs\Gabdushev_ReaderConfig.txt"
+reader_class := "maloxit.Pipeline.Reader"
+writer_config_file := "configs\Gabdushev_WriterConfig.txt"
+writer_class := "maloxit.Pipeline.Writer"
+executor_config_file_list := "configs\Gabdushev_ExecutorConfigEncode.txt, configs\Gabdushev_ExecutorConfigDecode.txt"
+executor_class_list := "maloxit.Pipeline.Executor, maloxit.Pipeline.Executor"

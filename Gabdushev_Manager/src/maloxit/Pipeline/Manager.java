@@ -5,39 +5,37 @@ import com.java_polytech.pipeline_interfaces.*;
 import java.io.*;
 import java.util.HashMap;
 
-class Manager {
-    private static final String INPUT_FILE_CONFIG_NAME = "input_file";
-    private static final String OUTPUT_FILE_CONFIG_NAME = "output_file";
-    private static final String READER_CONFIG_FILE_CONFIG_NAME = "reader_config_file";
-    private static final String WRITER_CONFIG_FILE_CONFIG_NAME = "writer_config_file";
-    private static final String EXECUTOR_CONFIG_FILE_CONFIG_NAME = "executor_config_file";
-    private static final String READER_CLASS_NAME_CONFIG_NAME = "reader_class";
-    private static final String WRITER_CLASS_NAME_CONFIG_NAME = "writer_class";
-    private static final String EXECUTOR_CLASS_NAME_CONFIG_NAME = "executor_class";
+class PipelineParams {
+    public final String inputFileName;
+    public final String outputFileName;
+    public final String readerConfigFileName;
+    public final String readerClassName;
+    public final String writerConfigFileName;
+    public final String writerClassName;
+    public final String[] executorConfigFileNameList;
+    public final String[] executorClassNameList;
 
-
-    class PipelineParams {
-        public final String inputFileName;
-        public final String outputFileName;
-        public final String readerConfigFileName;
-        public final String writerConfigFileName;
-        public final String executorConfigFileName;
-        public final String readerClassName;
-        public final String writerClassName;
-        public final String executorClassName;
-
-
-        public PipelineParams(String inputFileName, String outputFileName, String readerConfigFileName, String writerConfigFileName, String executorConfigFileName, String readerClassName, String writerClassName, String executorClassName) {
-            this.inputFileName = inputFileName;
-            this.outputFileName = outputFileName;
-            this.readerConfigFileName = readerConfigFileName;
-            this.writerConfigFileName = writerConfigFileName;
-            this.executorConfigFileName = executorConfigFileName;
-            this.readerClassName = readerClassName;
-            this.writerClassName = writerClassName;
-            this.executorClassName = executorClassName;
-        }
+    public PipelineParams(String inputFileName, String outputFileName, String readerConfigFileName, String readerClassName, String writerConfigFileName, String writerClassName, String[] executorConfigFileNameList, String[] executorClassNameList) {
+        this.inputFileName = inputFileName;
+        this.outputFileName = outputFileName;
+        this.readerConfigFileName = readerConfigFileName;
+        this.readerClassName = readerClassName;
+        this.writerConfigFileName = writerConfigFileName;
+        this.writerClassName = writerClassName;
+        this.executorConfigFileNameList = executorConfigFileNameList;
+        this.executorClassNameList = executorClassNameList;
     }
+}
+
+class Manager {
+    private FileInputStream input;
+    private FileOutputStream output;
+    private String readerConfigFileName;
+    private IReader reader;
+    private String writerConfigFileName;
+    private IWriter writer;
+    private IExecutor[] executorList;
+    private String[] executorConfigFileNameList;
 
     /**
      * Uses parameters from given config file to build a pipeline
@@ -45,18 +43,11 @@ class Manager {
      * @return Return Code object, which contains information about reason of the end of work
      */
     public RC runFromConfig(String managerConfigFileName) {
+        RC rc;
         IUniversalConfigReader config = new UniversalConfigReader();
+        ManagerGrammar grammar = new ManagerGrammar();
         try {
-            RC rc = config.SetGrammar(new Grammar(
-                    INPUT_FILE_CONFIG_NAME,
-                    OUTPUT_FILE_CONFIG_NAME,
-                    READER_CONFIG_FILE_CONFIG_NAME,
-                    WRITER_CONFIG_FILE_CONFIG_NAME,
-                    EXECUTOR_CONFIG_FILE_CONFIG_NAME,
-                    READER_CLASS_NAME_CONFIG_NAME,
-                    WRITER_CLASS_NAME_CONFIG_NAME,
-                    EXECUTOR_CLASS_NAME_CONFIG_NAME
-            ), RC.RCWho.MANAGER);
+            rc = config.SetGrammar(grammar, RC.RCWho.MANAGER);
             if (!rc.isSuccess())
                 return rc;
             rc = config.ParseConfig(new FileReader(managerConfigFileName));
@@ -66,51 +57,36 @@ class Manager {
             return RC.RC_MANAGER_CONFIG_FILE_ERROR;
         }
         HashMap<String, String> data = config.GetData();
-
-        String inputFileName = data.get(INPUT_FILE_CONFIG_NAME);
-
-        String outputFileName = data.get(OUTPUT_FILE_CONFIG_NAME);
-
-        String readerConfigFileName = data.get(READER_CONFIG_FILE_CONFIG_NAME);
-
-        String writerConfigFileName = data.get(WRITER_CONFIG_FILE_CONFIG_NAME);
-
-        String executorConfigFileName = data.get(EXECUTOR_CONFIG_FILE_CONFIG_NAME);
-
-        String readerClassName = data.get(READER_CLASS_NAME_CONFIG_NAME);
-
-        String writerClassName = data.get(WRITER_CLASS_NAME_CONFIG_NAME);
-
-        String executorClassName = data.get(EXECUTOR_CLASS_NAME_CONFIG_NAME);
-
-        return buildPipeline(new PipelineParams(inputFileName, outputFileName, readerConfigFileName, writerConfigFileName, executorConfigFileName, readerClassName, writerClassName, executorClassName));
+        PipelineParams params = grammar.PipelineParamsFromData(data);
+        if (params == null)
+            return RC.RC_MANAGER_CONFIG_GRAMMAR_ERROR;
+        SemanticAnalise(params);
+        return buildPipeline();
     }
 
     /**
-     * Builds and runs a pipeline with given parameters.
-     * @param pipelineParams Parameters for pipeline
+     * Checks if given parameters are semantically correct and initialises manager fields.
+     * @param params Parameters for pipeline
      * @return Return Code object, which contains information about reason of the end of work
      */
-    private RC buildPipeline(PipelineParams pipelineParams) {
-        FileInputStream input;
-        FileOutputStream output;
-        IReader reader;
-        IWriter writer;
-        IExecutor executor;
+    private RC SemanticAnalise(PipelineParams params) {
 
+        readerConfigFileName = params.readerConfigFileName;
+        writerConfigFileName = params.writerConfigFileName;
+        executorConfigFileNameList = params.executorConfigFileNameList;
         try {
-            input = new FileInputStream(pipelineParams.inputFileName);
+            input = new FileInputStream(params.inputFileName);
         } catch (FileNotFoundException ex) {
             return RC.RC_MANAGER_INVALID_INPUT_FILE;
         }
         try {
-            output = new FileOutputStream(pipelineParams.outputFileName);
+            output = new FileOutputStream(params.outputFileName);
         } catch (FileNotFoundException ex) {
             return RC.RC_MANAGER_INVALID_OUTPUT_FILE;
         }
 
         try {
-            Class<?> tmp = Class.forName(pipelineParams.readerClassName);
+            Class<?> tmp = Class.forName(params.readerClassName);
             if (IReader.class.isAssignableFrom(tmp))
                 reader = (IReader) tmp.getDeclaredConstructor().newInstance();
             else
@@ -119,7 +95,7 @@ class Manager {
             return RC.RC_MANAGER_INVALID_READER_CLASS;
         }
         try {
-            Class<?> tmp = Class.forName(pipelineParams.writerClassName);
+            Class<?> tmp = Class.forName(params.writerClassName);
             if (IWriter.class.isAssignableFrom(tmp))
                 writer = (IWriter) tmp.getDeclaredConstructor().newInstance();
             else
@@ -127,17 +103,30 @@ class Manager {
         } catch (Exception e) {
             return RC.RC_MANAGER_INVALID_WRITER_CLASS;
         }
+
+        if (params.executorConfigFileNameList.length != params.executorClassNameList.length)
+            return new RC(RC.RCWho.MANAGER, RC.RCType.CODE_CONFIG_SEMANTIC_ERROR, "Executors config files count must match the count of executor classes.");
+        executorList = new IExecutor[params.executorClassNameList.length];
         try {
-            Class<?> tmp = Class.forName(pipelineParams.executorClassName);
-            if (IExecutor.class.isAssignableFrom(tmp))
-                executor = (IExecutor) tmp.getDeclaredConstructor().newInstance();
-            else
-                return RC.RC_MANAGER_INVALID_EXECUTOR_CLASS;
+
+            for (int i = 0; i < executorList.length; i++) {
+                Class<?> tmp = Class.forName(params.executorClassNameList[i]);
+                if (IExecutor.class.isAssignableFrom(tmp))
+                    executorList[i] = (IExecutor) tmp.getDeclaredConstructor().newInstance();
+                else
+                    return RC.RC_MANAGER_INVALID_EXECUTOR_CLASS;
+            }
         } catch (Exception e) {
             return RC.RC_MANAGER_INVALID_EXECUTOR_CLASS;
         }
+        return RC.RC_SUCCESS;
+    }
 
-
+    /**
+     * Builds and runs a pipeline.
+     * @return Return Code object, which contains information about reason of the end of work
+     */
+    private RC buildPipeline() {
         RC rc = reader.setInputStream(input);
         if (!rc.isSuccess())
             return rc;
@@ -145,20 +134,26 @@ class Manager {
         if (!rc.isSuccess())
             return rc;
 
-        rc = reader.setConsumer(executor);
-        if (!rc.isSuccess())
-            return rc;
-        rc = executor.setConsumer(writer);
+        IProvider provider = reader;
+        for (IExecutor iExecutor : executorList) {
+            rc = provider.setConsumer(iExecutor);
+            if (!rc.isSuccess())
+                return rc;
+            provider = iExecutor;
+        }
+        rc = provider.setConsumer(writer);
         if (!rc.isSuccess())
             return rc;
 
-        rc = reader.setConfig(pipelineParams.readerConfigFileName);
+        rc = reader.setConfig(readerConfigFileName);
         if (!rc.isSuccess())
             return rc;
-        rc = executor.setConfig(pipelineParams.executorConfigFileName);
-        if (!rc.isSuccess())
-            return rc;
-        rc = writer.setConfig(pipelineParams.writerConfigFileName);
+        for (int i = 0; i < executorList.length; i++) {
+            rc = executorList[i].setConfig(executorConfigFileNameList[i]);
+            if (!rc.isSuccess())
+                return rc;
+        }
+        rc = writer.setConfig(writerConfigFileName);
         if (!rc.isSuccess())
             return rc;
 
