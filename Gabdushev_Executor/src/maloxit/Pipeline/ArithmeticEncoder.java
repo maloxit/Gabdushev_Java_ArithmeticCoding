@@ -2,6 +2,8 @@ package maloxit.Pipeline;
 
 import com.java_polytech.pipeline_interfaces.RC;
 
+import java.util.function.Function;
+
 class ArithmeticEncoder extends AdaptiveArithmeticCoder {
 
     private int bufferByte;
@@ -10,7 +12,7 @@ class ArithmeticEncoder extends AdaptiveArithmeticCoder {
     private double workingLow;
     private double workingHigh;
 
-    public ArithmeticEncoder(double normalWeightsMax, double ceilingWeightsMax, AutoDataBuffer out) {
+    public ArithmeticEncoder(double normalWeightsMax, double ceilingWeightsMax, Function<Byte, RC> out) {
         super(normalWeightsMax, ceilingWeightsMax, out);
         bufferByte = 0;
         bufferByteFreeBits = 8;
@@ -35,10 +37,7 @@ class ArithmeticEncoder extends AdaptiveArithmeticCoder {
         RC rc = TryPutBits();
         if (!rc.isSuccess())
             return rc;
-        rc = PrintFinalByte();
-        if (!rc.isSuccess())
-            return rc;
-        return out.flush();
+        return PrintFinalByte();
     }
 
     private void UpdateWorkingRange(int index) {
@@ -116,7 +115,7 @@ class ArithmeticEncoder extends AdaptiveArithmeticCoder {
     }
 
     private RC PrintAndClearBuffByte() {
-        RC rc = out.write((byte) bufferByte);
+        RC rc = out.apply((byte) bufferByte);
         bufferByte = 0;
         bufferByteFreeBits = 8;
         return rc;

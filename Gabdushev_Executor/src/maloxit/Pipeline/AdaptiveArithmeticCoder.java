@@ -3,6 +3,7 @@ package maloxit.Pipeline;
 import com.java_polytech.pipeline_interfaces.RC;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 abstract class AdaptiveArithmeticCoder {
 
@@ -12,16 +13,16 @@ abstract class AdaptiveArithmeticCoder {
     protected final double[] splitPoints;
     protected final double normalWeightsMax;
     protected final double ceilingWeightsMax;
-    protected final AutoDataBuffer out;
+    protected final Function<Byte, RC> out;
 
     /**
      *Abstract Coder, that implements adaptive functionality with overflow prevention
      * @param normalWeightsMax Normal weight value, to which the highest value will be dropped after reaching ceilingWeightsMax
      * @param ceilingWeightsMax Ceiling weight value of individual character. When some weight reaches it, all weights
      *                          are dropped down to be not greater than normalWeightsMax
-     * @param out Buffered output object
+     * @param out output callback function
      */
-    protected AdaptiveArithmeticCoder(double normalWeightsMax, double ceilingWeightsMax, AutoDataBuffer out) {
+    protected AdaptiveArithmeticCoder(double normalWeightsMax, double ceilingWeightsMax, Function<Byte, RC> out) {
         this.normalWeightsMax = normalWeightsMax;
         this.ceilingWeightsMax = ceilingWeightsMax;
         this.weights = new double[alphabetLen + 1];

@@ -2,6 +2,8 @@ package maloxit.Pipeline;
 
 import com.java_polytech.pipeline_interfaces.RC;
 
+import java.util.function.Function;
+
 class ArithmeticDecoder extends AdaptiveArithmeticCoder {
 
     private boolean hasReachedEnd;
@@ -12,7 +14,7 @@ class ArithmeticDecoder extends AdaptiveArithmeticCoder {
     int lowSplitPointIndex;
     int highSplitPointIndex;
 
-    public ArithmeticDecoder(double normalWeightsMax, double ceilingWeightsMax, AutoDataBuffer out) {
+    public ArithmeticDecoder(double normalWeightsMax, double ceilingWeightsMax, Function<Byte, RC> out) {
         super(normalWeightsMax, ceilingWeightsMax, out);
         hasReachedEnd = false;
         workingLow = 0;
@@ -43,7 +45,6 @@ class ArithmeticDecoder extends AdaptiveArithmeticCoder {
             ProcessNextBit(0);
             rc = TryOutputByte();
         }
-        out.flush();
         return rc;
     }
 
@@ -77,12 +78,12 @@ class ArithmeticDecoder extends AdaptiveArithmeticCoder {
             highSplitPointIndex = splitPoints.length;
             if (index == alphabetLen) {
                 hasReachedEnd = true;
-                rc = out.flush();
+                rc = RC.RC_SUCCESS;
             } else {
                 UpdateWorkingRange(index);
                 TryZoomIn();
                 UpdateWeight(index);
-                rc = out.write((byte) index);
+                rc = out.apply((byte) index);
             }
         }
         return rc;

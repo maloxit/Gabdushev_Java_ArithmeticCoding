@@ -8,6 +8,15 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
+class ReaderParams
+{
+    public final String BUFFER_SIZE_STR;
+
+    ReaderParams(String buffer_size_str) {
+        BUFFER_SIZE_STR = buffer_size_str;
+    }
+}
+
 public class Reader implements IReader {
 
     private static final String BUFFER_SIZE_CONFIG_NAME = "buffer_size";
@@ -24,11 +33,11 @@ public class Reader implements IReader {
      */
     @Override
     public RC setConfig(String cfgFileName) {
+        RC rc;
         IUniversalConfigReader config = new UniversalConfigReader();
+        ReaderGrammar grammar = new ReaderGrammar();
         try {
-            RC rc = config.SetGrammar(new Grammar(
-                    BUFFER_SIZE_CONFIG_NAME
-            ), RC.RCWho.READER);
+            rc = config.SetGrammar(grammar, RC.RCWho.READER);
             if (!rc.isSuccess())
                 return rc;
             rc = config.ParseConfig(new FileReader(cfgFileName));
@@ -38,8 +47,25 @@ public class Reader implements IReader {
             return RC.RC_READER_CONFIG_FILE_ERROR;
         }
         HashMap<String, String> data = config.GetData();
+        ReaderParams params = grammar.ReaderParamsFromData(data);
+        if (params == null)
+            return RC.RC_READER_CONFIG_GRAMMAR_ERROR;
+
+        rc = SemanticAnalise(params);
+        if (!rc.isSuccess())
+            return rc;
+
+        return RC.RC_SUCCESS;
+    }
+
+    /**
+     * Checks if given parameters are semantically correct and initialises readers fields.
+     * @param params Parameters for reader
+     * @return Return Code object, which contains information about reason of the end of work
+     */
+    private RC SemanticAnalise(ReaderParams params) {
         try {
-            String tmp = data.get(BUFFER_SIZE_CONFIG_NAME);
+            String tmp = params.BUFFER_SIZE_STR;
             BUFFER_SIZE = Integer.parseInt(tmp);
             if (BUFFER_SIZE <= 0) {
                 return RC.RC_READER_CONFIG_SEMANTIC_ERROR;
@@ -47,6 +73,7 @@ public class Reader implements IReader {
         } catch (NumberFormatException ex) {
             return RC.RC_READER_CONFIG_SEMANTIC_ERROR;
         }
+        assert (BUFFER_SIZE % Character.BYTES == 0 && BUFFER_SIZE % Integer.BYTES == 0);
         return RC.RC_SUCCESS;
     }
 
